@@ -18,6 +18,8 @@ const Precio = () => {
   hoy.setDate(hoy.getDate() - 1);
   const maxFecha = hoy.toISOString().split("T")[0];
 
+  // URL del Backend Inteligente (Netlify en producción o local en PyCharm)
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // CAMBIO FECHA
   const handleFechaChange = (e) => {
@@ -52,7 +54,7 @@ const Precio = () => {
     setResultadoTexto('');
     setResultados([]);
 
-    const data = await fetchSeguro(`http://localhost:8000/precio/fecha/${fechaFormateada}`);
+    const data = await fetchSeguro(`${API_BASE_URL}/precio/fecha/${fechaFormateada}`);
 
     if (!data) {
       setLoading(false);
