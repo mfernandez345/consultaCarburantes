@@ -15,12 +15,19 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Mover cámara en el mapa
+// Mover cámara en el mapa + arreglo de mosaico roto
 function ChangeView({ center, zoom }) {
   const map = useMap();
+
   useEffect(() => {
     map.setView(center, zoom);
+    // Forzamos al mapa a recolocar las teselas rotas esperando un instante a que el DOM se asiente
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
   }, [center, zoom, map]);
+
   return null;
 }
 
@@ -30,20 +37,22 @@ function Estaciones() {
   const [loading, setLoading] = useState(false);
   const [mapConfig, setMapConfig] = useState({ center: [40.4167, -3.7037], zoom: 5 });
 
+  // Obtener la URL del Backend (Usa la variable de Netlify o cae a localhost si estás en PyCharm)
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
   // 1. Cargar el GeoJSON de las Comunidades Autónomas
   useEffect(() => {
     fetchSeguro('https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/spain-communities.geojson')
   .then(data => {
     if (data) setGeoData(data);
   });
-
   }, []);
 
   // 2. Función para obtener gasolineras por CCAA desde tu Backend
   const fetchGasolineras = async (idCCAA) => {
     setGasolineras([]);
     setLoading(true);
-     const data = await fetchSeguro(`http://localhost:8000/gasolineras/comunidad/${idCCAA}`);
+     const data = await fetchSeguro(`${API_BASE_URL}/gasolineras/comunidad/${idCCAA}`);
      if (!data) {
         setLoading(false);
         return;
