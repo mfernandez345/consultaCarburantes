@@ -50,11 +50,16 @@ const provinciasCosteras = {
   Melilla:"52"
 };
 
-// Mover cámara
+// Mover cámara + Forzar reajuste de mosaico
 function ChangeView({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
     map.setView(center, zoom);
+    // Truco del temporizador para recalcular el tamaño real del mapa en el DOM
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 250);
+    return () => clearTimeout(timer);
   }, [center, zoom, map]);
   return null;
 }
@@ -69,6 +74,9 @@ function Postes() {
     center: [40.4167, -3.7037],
     zoom: 5
   });
+
+// URL del Backend Inteligente (Netlify o local)
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // TEMPORIZADOR VUELTA AL ESTADO INICIAL
   useEffect(() => {
@@ -104,7 +112,7 @@ function Postes() {
     setPostes([]);
 
    const lista = await fetchSeguro(
-      `http://localhost:8000/postes/provincia/${idProvincia}`
+      `${API_BASE_URL}/postes/provincia/${idProvincia}`
     );
 
     if (!lista) {
