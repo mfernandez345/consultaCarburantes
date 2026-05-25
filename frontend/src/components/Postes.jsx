@@ -115,18 +115,19 @@ function Postes() {
       `${API_BASE_URL}/postes/provincia/${idProvincia}`
     );
 
-    if (!lista) {
-      // Backend apagado
+    if (lista === null) {
       setLoading(false);
+      setHaConsultadoProvincia(false);
       return;
     }
-      //Controlar provincias marítimas sin postes
-      if (!lista || lista.length === 0) {
-          setSinPostes(true);
-          setPostes([]);
-          setLoading(false);
-          return;
-      }
+
+    // Si vino vacío [], o si fetchSeguro interceptó el XML/503 y lo normalizó a []
+    if (lista.length === 0) {
+        setSinPostes(true);
+        setPostes([]);
+        setLoading(false);
+        return; // Esto dispara perfectamente tu useEffect con el temporizador de 3 segundos
+    }
       const data = lista
           .map((p) => {
             const lat = parseFloat(
